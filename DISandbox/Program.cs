@@ -21,8 +21,23 @@ interface IOtherService {
 class GuidService : IOtherService {
     public Guid Id { get; } = Guid.NewGuid();
 }
+public interface INotRegisteredService {
+    void DoSomething();
+}
 
-class GuidDependantService(IService logService, IOtherService guidService) {
+class GuidDependantService {
+    private readonly IService logService;
+    private readonly IOtherService? guidService;
+
+    public GuidDependantService(IService logService, INotRegisteredService guidService) {
+        this.logService = logService;
+    }
+
+    public GuidDependantService(IService logService, IOtherService guidService) {
+        this.logService = logService;
+        this.guidService = guidService;
+    }
+
     public void LogWithId(string message) {
         logService.Log($"[GuidDependantService] {message} (ID: {guidService.Id})");
     }

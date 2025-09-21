@@ -6,11 +6,10 @@
         </Content>
     </ItemGroup>
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.0.1.1-alpha</Version>
+        <Version>0.0.1.2-alpha</Version>
         <Title>Syrette </Title>
         <Authors>Lorefice Samuele</Authors>
         <Description>Syrette is a minimalistic dependency injection library for C#. It aims to provide a simple and efficient way to achieve dependency injections in your applications without the overhead of larger frameworks.</Description>
@@ -24,6 +23,7 @@
         <Company>Samuele Lorefice</Company>
         <Deterministic>true</Deterministic>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DebugSymbols>true</DebugSymbols>

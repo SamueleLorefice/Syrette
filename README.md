@@ -10,11 +10,11 @@ It is designed to be used in minimalistic applications, such as console applicat
 - **Lightweight**: Minimal codebase with no external dependencies. 1 class, the service container. You don't need anything else.
 - **Simple API**: You register services using two methods (one for singletons, one for transients) and resolve them with one.
 - **Supports Singleton and Transient lifetimes**: Choose between singleton (one instance per container) and transient (new instance per resolution) lifetimes for your services.
+- **Greedy matching constructor selection**: When resolving a service, the constructor with the most parameters that can be satisfied by the container is chosen.
 
 ## Limitations
 - **No support for scoped lifetimes**
 - **No support for property injection or method injection.**
-- **Every service should have only 1 constructor.** (planned to be lifted in future versions)
 
 ## Usage
 ````csharp

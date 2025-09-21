@@ -1,4 +1,6 @@
-﻿namespace Syrette;
+﻿using System.Reflection;
+
+namespace Syrette;
 
 /// <summary>
 /// Container for managing service registrations and resolutions.
@@ -26,9 +28,7 @@ public class ServiceContainer {
         descriptors.Add(new ServiceDescriptor {
             ServiceType = typeof(TInterface),
             ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Lifetime,
-            RequiredTypes = typeof(TImplementation).GetConstructors().Single()
-                .GetParameters().Select(p => p.ParameterType).ToList()
+            Lifetime = ServiceLifetime.Lifetime
         });
         return this;
     }
@@ -43,9 +43,7 @@ public class ServiceContainer {
         descriptors.Add(new ServiceDescriptor {
             ServiceType = typeof(TInterface),
             ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Transient,
-            RequiredTypes = typeof(TImplementation).GetConstructors().Single()
-                .GetParameters().Select(p => p.ParameterType).ToList()
+            Lifetime = ServiceLifetime.Transient
         });
         return this;
     }
@@ -71,20 +69,27 @@ public class ServiceContainer {
         
         if (descriptor == null) throw new Exception($"Service of type {typeof(TInterface)} not registered.");
         
-        // Ensure all required dependencies are registered
-        //TODO: some services might be asking for specific implementations, not interfaces. We should check for that too.
-        var missing = descriptor.RequiredTypes
-            //filter all required types that are not in the registered descriptors
-            .Where(t => descriptors.All(d => d.ServiceType != t))
-            .Select(t => t.Name)
-            .ToList();
+        var ctors = descriptor.ImplementationType.GetConstructors();
+        int max = -1;
+        ConstructorInfo? bestCtor = null;
         
-        if (missing.Any())
-            throw new Exception($"Cannot create service of type {typeof(TInterface)}. Missing dependencies: {string.Join(", ", missing)}");
+        foreach (var ctor in ctors) {
+            var parameters = ctor.GetParameters();
+            //check if all parameters are registered services or optional
+            if (!parameters.All(p => descriptors.Any(d => d.ServiceType == p.ParameterType) || p.IsOptional)) continue;
+            //check if this constructor has more registered parameters than the previous best
+            int satisfiedParams = parameters.Count(p => descriptors.Any(d => d.ServiceType == p.ParameterType));
+            if (satisfiedParams > max) {
+                max = satisfiedParams;
+                bestCtor = ctor;
+            }
+        }
+        if (bestCtor == null)
+            throw new Exception($"Cannot create service of type {typeof(TInterface)}. No suitable constructor found.");
         
         // Transient: create a new instance each time
         if (descriptor.Lifetime != ServiceLifetime.Lifetime) {
-            var service = Instantiate<TInterface>(descriptor);
+            var service = Instantiate<TInterface>(descriptor, bestCtor);
             return service;
         }
 
@@ -97,12 +102,22 @@ public class ServiceContainer {
         return newSingleton;
     }
 
-    private TInterface Instantiate<TInterface>(ServiceDescriptor descriptor) {
-        var par = descriptor.ImplementationType
-            .GetConstructors().Single()
-            .GetParameters()
-            .Select(p => p.ParameterType)
-            .ToList();
+    private TInterface Instantiate<TInterface>(ServiceDescriptor descriptor, ConstructorInfo? ctor = null) {
+        if (ctor == null && descriptor.ImplementationType.GetConstructors().Length > 1)
+            throw new Exception($"Multiple constructors found for type {descriptor.ImplementationType}. Please provide a specific constructor.");
+        
+        List<Type> par;
+        
+        if (ctor == null)
+            par = descriptor.ImplementationType
+                .GetConstructors().Single()
+                .GetParameters()
+                .Select(p => p.ParameterType)
+                .ToList();
+        else 
+            par = ctor.GetParameters()
+                .Select(p => p.ParameterType)
+                .ToList();
         
         object[] parameters = new object[par.Count];
         
