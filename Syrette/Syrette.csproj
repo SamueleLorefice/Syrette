@@ -1,22 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+    <ItemGroup>
+        <Content Include="..\README.md">
+            <Link>README.md</Link>
+            <PackagePath>./</PackagePath>
+        </Content>
+    </ItemGroup>
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.0.1-alpha</Version>
+        <Version>0.0.1.1-alpha</Version>
         <Title>Syrette </Title>
         <Authors>Lorefice Samuele</Authors>
         <Description>Syrette is a minimalistic dependency injection library for C#. It aims to provide a simple and efficient way to achieve dependency injections in your applications without the overhead of larger frameworks.</Description>
         <Copyright>2025 Lorefice Samuele</Copyright>
         <PackageProjectUrl>https://git.r3d.codes/REDCODE/Syrette</PackageProjectUrl>
-        <PackageLicenseUrl>https://git.r3d.codes/REDCODE/Syrette/src/branch/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://git.r3d.codes/REDCODE/Syrette</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>DI, Dependency Injection</PackageTags>
+        <PackageTags>DI Dependency Injection</PackageTags>
         <Company>Samuele Lorefice</Company>
+        <Deterministic>true</Deterministic>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
-
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugSymbols>true</DebugSymbols>
+      <DocumentationFile>bin\Release\Syrette.xml</DocumentationFile>
+    </PropertyGroup>
 </Project>

@@ -1,5 +1,8 @@
 ﻿namespace Syrette;
 
+/// <summary>
+/// Container for managing service registrations and resolutions.
+/// </summary>
 public class ServiceContainer {
     private readonly List<ServiceDescriptor> descriptors = new();
     private readonly Dictionary<Type, object> singletons = new();
@@ -13,6 +16,11 @@ public class ServiceContainer {
         descriptors.Where(d => d.ServiceType == typeof(TServices))
             .Select(d => d.ImplementationType).ToList();
     
+    /// <summary>
+    /// Registers a singleton service with its implementation.
+    /// </summary>
+    /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
+    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddSingleton<TInterface, TImplementation>()
         where TImplementation : class, TInterface {
         descriptors.Add(new ServiceDescriptor {
@@ -25,6 +33,11 @@ public class ServiceContainer {
         return this;
     }
 
+    /// <summary>
+    /// Registers a transient service with its implementation.
+    /// </summary>
+    /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
+    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddTransient<TInterface, TImplementation>()
         where TImplementation : class, TInterface {
         descriptors.Add(new ServiceDescriptor {
@@ -48,6 +61,11 @@ public class ServiceContainer {
         return method.Invoke(this, null)!;
     }
     
+    /// <summary>
+    /// Resolves and returns an instance of the requested service type.
+    /// </summary>
+    /// <typeparam name="TInterface">Interface type of the service being requested</typeparam>
+    /// <returns>Resolved service instance</returns>
     public TInterface GetService<TInterface>() {
         var descriptor = descriptors.FirstOrDefault(d => d.ServiceType == typeof(TInterface));
         
