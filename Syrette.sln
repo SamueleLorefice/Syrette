@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickDI", "QuickDI\QuickDI.csproj", "{4730ABA2-3979-4B74-A3FF-042F6C3C47D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syrette", "Syrette\Syrette.csproj", "{4730ABA2-3979-4B74-A3FF-042F6C3C47D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DISandbox", "DISandbox\DISandbox.csproj", "{536F5490-926D-4B2A-8F07-9A7D1F8B9381}"
 EndProject

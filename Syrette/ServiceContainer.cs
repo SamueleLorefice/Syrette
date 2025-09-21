@@ -1,10 +1,8 @@
-﻿using System.Reflection;
-
-namespace QuickDI;
+﻿namespace Syrette;
 
 public class ServiceContainer {
-    private List<ServiceDescriptor> _descriptors = new();
-    private Dictionary<Type, object> _singletons = new();
+    private readonly List<ServiceDescriptor> descriptors = new();
+    private readonly Dictionary<Type, object> singletons = new();
 
     /// <summary>
     /// Get all registered implementation types for a given service type.
@@ -12,12 +10,12 @@ public class ServiceContainer {
     /// <typeparam name="TServices"></typeparam>
     /// <returns></returns>
     public List<Type> GetServices<TServices>() => 
-        _descriptors.Where(d => d.ServiceType == typeof(TServices))
+        descriptors.Where(d => d.ServiceType == typeof(TServices))
             .Select(d => d.ImplementationType).ToList();
     
     public ServiceContainer AddSingleton<TInterface, TImplementation>()
         where TImplementation : class, TInterface {
-        _descriptors.Add(new ServiceDescriptor {
+        descriptors.Add(new ServiceDescriptor {
             ServiceType = typeof(TInterface),
             ImplementationType = typeof(TImplementation),
             Lifetime = ServiceLifetime.Lifetime,
@@ -29,7 +27,7 @@ public class ServiceContainer {
 
     public ServiceContainer AddTransient<TInterface, TImplementation>()
         where TImplementation : class, TInterface {
-        _descriptors.Add(new ServiceDescriptor {
+        descriptors.Add(new ServiceDescriptor {
             ServiceType = typeof(TInterface),
             ImplementationType = typeof(TImplementation),
             Lifetime = ServiceLifetime.Transient,
@@ -51,7 +49,7 @@ public class ServiceContainer {
     }
     
     public TInterface GetService<TInterface>() {
-        var descriptor = _descriptors.FirstOrDefault(d => d.ServiceType == typeof(TInterface));
+        var descriptor = descriptors.FirstOrDefault(d => d.ServiceType == typeof(TInterface));
         
         if (descriptor == null) throw new Exception($"Service of type {typeof(TInterface)} not registered.");
         
@@ -59,7 +57,7 @@ public class ServiceContainer {
         //TODO: some services might be asking for specific implementations, not interfaces. We should check for that too.
         var missing = descriptor.RequiredTypes
             //filter all required types that are not in the registered descriptors
-            .Where(t => _descriptors.All(d => d.ServiceType != t))
+            .Where(t => descriptors.All(d => d.ServiceType != t))
             .Select(t => t.Name)
             .ToList();
         
@@ -73,11 +71,11 @@ public class ServiceContainer {
         }
 
         // Singleton: return existing instance
-        if (_singletons.TryGetValue(descriptor.ServiceType, out object? singleton)) return (TInterface)singleton;
+        if (singletons.TryGetValue(descriptor.ServiceType, out object? singleton)) return (TInterface)singleton;
         
         // or create a new one if not yet created.
         var newSingleton = Instantiate<TInterface>(descriptor);
-        _singletons[descriptor.ServiceType] = newSingleton!;
+        singletons[descriptor.ServiceType] = newSingleton!;
         return newSingleton;
     }
 

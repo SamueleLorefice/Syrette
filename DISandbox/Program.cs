@@ -1,4 +1,4 @@
-﻿using QuickDI;
+﻿using Syrette;
 
 namespace DISandbox; 
 

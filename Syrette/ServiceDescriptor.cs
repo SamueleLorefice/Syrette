@@ -1,4 +1,4 @@
-﻿namespace QuickDI;
+﻿namespace Syrette;
 
 public class ServiceDescriptor {
     public required Type ServiceType { get; set; }

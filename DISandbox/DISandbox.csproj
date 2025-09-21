@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\QuickDI\QuickDI.csproj" />
+      <ProjectReference Include="..\Syrette\Syrette.csproj" />
     </ItemGroup>
 
 </Project>
