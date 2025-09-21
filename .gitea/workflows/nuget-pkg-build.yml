@@ -21,6 +21,6 @@ jobs:
       #- name: Test
       #  run: dotnet test -c Release --no-build
       - name: Pack nugets
-        run: dotnet pack Syrette -c Release --no-build --output . --include-symbols --include-source
+        run: dotnet pack Syrette -c Release --no-build --output . --include-symbols --include-source -p:SymbolPackageFormat=snupkg
       - name: Push to NuGet
         run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGETAPIKEY}} --source https://api.nuget.org/v3/index.json
