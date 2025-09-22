@@ -26,4 +26,6 @@ jobs:
       - name: Pack nugets
         run: dotnet pack Syrette -c Release --no-build --output . --include-symbols --include-source -p:SymbolPackageFormat=snupkg
       - name: Push to NuGet
-        run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGETAPIKEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGETAPIKEY}} --skip-duplicate --source https://api.nuget.org/v3/index.json
+      - name: Push to Gitea
+        run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGETGITEA}} --skip-duplicate --source https://git.r3d.codes/api/packages/REDCODE/nuget/index.json
