@@ -39,7 +39,7 @@ class GuidDependantService {
     }
 
     public void LogWithId(string message) {
-        logService.Log($"[GuidDependantService] {message} (ID: {guidService.Id})");
+        logService.Log($"[GuidDependantService] {message} (ID: {guidService?.Id})");
     }
 }
 
