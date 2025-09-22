@@ -24,10 +24,25 @@ public class ServiceContainer {
     /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
     /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddSingleton<TInterface, TImplementation>()
+        where TInterface : class
         where TImplementation : class, TInterface {
-        descriptors.Add(new ServiceDescriptor {
+        descriptors.Add(new () {
             ServiceType = typeof(TInterface),
             ImplementationType = typeof(TImplementation),
+            Lifetime = ServiceLifetime.Lifetime
+        });
+        return this;
+    }
+    
+    /// <summary>
+    /// Registers a singleton service where the service type is the same as the implementation type.
+    /// </summary>
+    /// <typeparam name="TClass">Class type of the service</typeparam>
+    public ServiceContainer AddSingleton<TClass>()
+        where TClass : class {
+        descriptors.Add(new () {
+            ServiceType = typeof(TClass),
+            ImplementationType = typeof(TClass),
             Lifetime = ServiceLifetime.Lifetime
         });
         return this;
@@ -39,10 +54,25 @@ public class ServiceContainer {
     /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
     /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddTransient<TInterface, TImplementation>()
+        where TInterface : class
         where TImplementation : class, TInterface {
-        descriptors.Add(new ServiceDescriptor {
+        descriptors.Add(new () {
             ServiceType = typeof(TInterface),
             ImplementationType = typeof(TImplementation),
+            Lifetime = ServiceLifetime.Transient
+        });
+        return this;
+    }
+    
+    /// <summary>
+    /// Registers a transient service where the service type is the same as the implementation type.
+    /// </summary>
+    /// <typeparam name="TClass">Class type of the service</typeparam>
+    public ServiceContainer AddTransient<TClass>()
+        where TClass : class {
+        descriptors.Add(new () {
+            ServiceType = typeof(TClass),
+            ImplementationType = typeof(TClass),
             Lifetime = ServiceLifetime.Transient
         });
         return this;
