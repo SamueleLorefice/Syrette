@@ -92,12 +92,12 @@ public class ServiceContainer {
     /// <summary>
     /// Resolves and returns an instance of the requested service type.
     /// </summary>
-    /// <typeparam name="TInterface">Interface type of the service being requested</typeparam>
+    /// <typeparam name="TService">Interface type of the service being requested</typeparam>
     /// <returns>Resolved service instance</returns>
-    public TInterface GetService<TInterface>() {
-        var descriptor = descriptors.FirstOrDefault(d => d.ServiceType == typeof(TInterface));
+    public TService GetService<TService>() {
+        var descriptor = descriptors.FirstOrDefault(d => d.ServiceType == typeof(TService) || d.ImplementationType == typeof(TService));
         
-        if (descriptor == null) throw new Exception($"Service of type {typeof(TInterface)} not registered.");
+        if (descriptor == null) throw new Exception($"Service of type {typeof(TService)} not registered.");
         
         var ctors = descriptor.ImplementationType.GetConstructors();
         int max = -1;
@@ -115,19 +115,19 @@ public class ServiceContainer {
             }
         }
         if (bestCtor == null)
-            throw new Exception($"Cannot create service of type {typeof(TInterface)}. No suitable constructor found.");
+            throw new Exception($"Cannot create service of type {typeof(TService)}. No suitable constructor found.");
         
         // Transient: create a new instance each time
         if (descriptor.Lifetime != ServiceLifetime.Lifetime) {
-            var service = Instantiate<TInterface>(descriptor, bestCtor);
+            var service = Instantiate<TService>(descriptor, bestCtor);
             return service;
         }
 
         // Singleton: return existing instance
-        if (singletons.TryGetValue(descriptor.ServiceType, out object? singleton)) return (TInterface)singleton;
+        if (singletons.TryGetValue(descriptor.ServiceType, out object? singleton)) return (TService)singleton;
         
         // or create a new one if not yet created.
-        var newSingleton = Instantiate<TInterface>(descriptor);
+        var newSingleton = Instantiate<TService>(descriptor);
         singletons[descriptor.ServiceType] = newSingleton!;
         return newSingleton;
     }
