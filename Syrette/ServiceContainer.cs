@@ -24,7 +24,7 @@ public class ServiceContainer {
     /// <typeparam name="TService"></typeparam>
     public List<TService> GetServices<TService>() where TService : class =>
         descriptors.Where(d => d.ServiceType == typeof(TService))
-            .Select(d => (TService)GetService(d.ImplementationType)).ToList();
+            .Select(d => (TService)GetService(d.ImplementationType, d.Arguments?.ToArray())).ToList();
 
     /// <summary>
     /// Registers a singleton service with its implementation.
@@ -158,19 +158,21 @@ public class ServiceContainer {
     // so we use reflection to call the generic GetService<T> method with the provided type
     // Basically we build the method GetService<serviceType>() at runtime and then call it.
     // "Classic black magic sorcery" in reflection.
-    private object GetService(Type serviceType) {
+    private object GetService(Type serviceType, object[]? args = null) {
+        List<Type> arguments = [serviceType];
+
+        if (args != null) arguments.AddRange(args.ToList().Select(a => a.GetType()));
+        
         var method = typeof(ServiceContainer)
             .GetMethod(nameof(GetService))!
-            .MakeGenericMethod(serviceType);
-        return method.Invoke(this, null)!;
+            .MakeGenericMethod(arguments.ToArray());
+        
+        return method.Invoke(this, args)!;
     }
     
-    private object? TryGetService(Type serviceType) {
-        var method = typeof(ServiceContainer)
-            .GetMethod(nameof(GetService))!
-            .MakeGenericMethod(serviceType);
+    private object? TryGetService(Type serviceType, object[]? args = null) {
         try {
-            return method.Invoke(this, null)!;
+            return GetService(serviceType, args);
         } catch {
             return null!;
         }
@@ -230,7 +232,7 @@ public class ServiceContainer {
             throw new Exception($"Multiple constructors found for type {descriptor.ImplementationType}. Please provide a specific constructor.");
 
         List<ParameterInfo> par;
-        List<object> args = descriptor.Arguments ?? new List<object>();
+        List<object> args = descriptor.Arguments != null ? new List<object>(descriptor.Arguments) : new List<object>();
 
         if (ctor == null)
             par = descriptor.ImplementationType
