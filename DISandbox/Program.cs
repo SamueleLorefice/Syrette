@@ -12,6 +12,12 @@ class Service : IService {
     }
 }
 
+class AnotherService : IService {
+    public void Log(string message) {
+        Console.WriteLine($"[AnotherService] {message}");
+    }
+}
+
 interface IOtherService {
     public Guid Id { get; }
     
@@ -47,6 +53,7 @@ static class Program {
     static void Main(string[] args) {
         var container = new ServiceContainer()
             .AddSingleton<IService, Service>()
+            .AddTransient<IService, AnotherService>()
             .AddTransient<IOtherService, GuidService>()
             .AddTransient<GuidDependantService, GuidDependantService>();
 
@@ -55,5 +62,6 @@ static class Program {
         container.GetService<IOtherService>().ShowId();
         container.GetService<GuidDependantService>().LogWithId("Hello, sent from the dependency.");
         container.GetService<IService>().Log("Goodbye, Dependency Injection!");
+        var res = container.GetServices<IService>();
     }
 }

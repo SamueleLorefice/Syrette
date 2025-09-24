@@ -19,6 +19,14 @@ public class ServiceContainer {
             .Select(d => d.ImplementationType).ToList();
     
     /// <summary>
+    /// Get all registered services for a given service type.
+    /// </summary>
+    /// <typeparam name="TService"></typeparam>
+    public List<TService> GetServices<TService>() where TService : class =>
+        descriptors.Where(d => d.ServiceType == typeof(TService))
+            .Select(d => (TService)GetService(d.ImplementationType)).ToList();
+
+    /// <summary>
     /// Registers a singleton service with its implementation.
     /// </summary>
     /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
