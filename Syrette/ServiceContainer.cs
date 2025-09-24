@@ -14,7 +14,7 @@ public class ServiceContainer {
     /// </summary>
     /// <typeparam name="TServices"></typeparam>
     /// <returns></returns>
-    public List<Type> GetServices<TServices>() => 
+    public List<Type> GetServiceTypes<TServices>() => 
         descriptors.Where(d => d.ServiceType == typeof(TServices))
             .Select(d => d.ImplementationType).ToList();
     
