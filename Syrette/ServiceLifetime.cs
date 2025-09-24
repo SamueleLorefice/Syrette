@@ -7,7 +7,7 @@ public enum ServiceLifetime {
     /// <summary>
     /// Defines a singleton service, which is created once and shared throughout the application's lifetime.
     /// </summary>
-    Lifetime,
+    Singleton,
     /// <summary>
     /// Defines a transient service, which is created anew each time it is requested.
     /// </summary>

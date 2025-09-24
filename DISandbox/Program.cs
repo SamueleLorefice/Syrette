@@ -49,6 +49,16 @@ class GuidDependantService {
     }
 }
 
+public interface ICacheService {
+    public Uri CacheLocation { get; set; }
+}
+
+public class CacheService : ICacheService {
+    public required Uri CacheLocation { get; set; }
+    public CacheService() => CacheLocation = new Uri("http://default.cache");
+    public CacheService(Uri cacheLocation) => CacheLocation = cacheLocation;
+}
+
 static class Program {
     static void Main(string[] args) {
         var container = new ServiceContainer()
@@ -63,5 +73,12 @@ static class Program {
         container.GetService<GuidDependantService>().LogWithId("Hello, sent from the dependency.");
         container.GetService<IService>().Log("Goodbye, Dependency Injection!");
         var res = container.GetServices<IService>();
+        
+        var testContainer = new ServiceContainer()
+            .AddSingleton<ICacheService, CacheService>(new Uri("http://cache.local"));
+        var iCacheService = testContainer.GetService<ICacheService>();
+        Console.WriteLine($"[ICacheService] {iCacheService.CacheLocation}");
+        var cacheService = testContainer.GetService<CacheService>();
+        Console.WriteLine($"[CacheService] {cacheService.CacheLocation}");
     }
 }

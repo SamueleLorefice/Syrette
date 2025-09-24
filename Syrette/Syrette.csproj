@@ -9,7 +9,7 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.0.1.5-alpha</Version>
+        <Version>0.0.1.6-alpha</Version>
         <Title>Syrette </Title>
         <Authors>Lorefice Samuele</Authors>
         <Description>Syrette is a minimalistic dependency injection library for C#. It aims to provide a simple and efficient way to achieve dependency injections in your applications without the overhead of larger frameworks.</Description>

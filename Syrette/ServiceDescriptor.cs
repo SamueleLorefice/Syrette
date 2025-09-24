@@ -19,4 +19,9 @@ public class ServiceDescriptor
     /// Gets or sets the lifetime of the service (e.g., Singleton or Transient).
     /// </summary>
     public required ServiceLifetime Lifetime { get; set; }
+    
+    /// <summary>
+    /// Arguments to be passed to the constructor of the implementation type.
+    /// </summary>
+    public List<object>? Arguments { get; set; }
 }
