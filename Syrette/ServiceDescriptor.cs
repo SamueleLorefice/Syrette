@@ -25,6 +25,10 @@ public class ServiceDescriptor
     /// </summary>
     public List<object>? Arguments { get; init; }
 
+    /// <summary>
+    /// Returns a string with the specific type of service, its implementation, and its lifetime.
+    /// </summary>
+    /// <returns>{implementation Name} as {Service Name} ({Lifetime})</returns>
     public override string ToString() {
         return $"{ImplementationType.Name} as {ServiceType.Name} ({Lifetime})";
     }

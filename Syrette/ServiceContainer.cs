@@ -153,12 +153,17 @@ public class ServiceContainer {
         });
         return this;
     }
-
-    // you can't call generic methods with an unknown type at compile time
-    // so we use reflection to call the generic GetService<T> method with the provided type
-    // Basically we build the method GetService<serviceType>() at runtime and then call it.
-    // "Classic black magic sorcery" in reflection.
-    private object GetService(Type serviceType, object[]? args = null) {
+    
+    /// <summary>
+    /// Resolves and returns an instance of the requested service type.
+    /// </summary>
+    /// <param name="serviceType">Type of the service that's being requested</param>
+    /// <param name="args">arguments to pass to the constructor of the service</param>
+    /// <remarks> you can't call generic methods with an unknown type at compile time
+    /// so we use reflection to call the generic GetService{T} method with the provided
+    /// type Basically we build the method GetService{serviceType}() at runtime and then call it.</remarks>
+    /// <returns>An object that is the instantiated service type</returns>
+    public object GetService(Type serviceType, object[]? args = null) {
         List<Type> arguments = [serviceType];
 
         if (args != null) arguments.AddRange(args.ToList().Select(a => a.GetType()));
@@ -170,11 +175,20 @@ public class ServiceContainer {
         return method.Invoke(this, args)!;
     }
     
-    private object? TryGetService(Type serviceType, object[]? args = null) {
+    /// <summary>
+    /// tries to resolve and return an instance of the requested service type. Returns null if it fails.
+    /// </summary>
+    /// <param name="serviceType">Type of the service that's being requested</param>
+    /// <param name="args">arguments to pass to the constructor of the service</param>
+    /// <remarks> you can't call generic methods with an unknown type at compile time
+    /// so we use reflection to call the generic GetService{T} method with the provided
+    /// type Basically we build the method GetService{serviceType}() at runtime and then call it.</remarks>
+    /// <returns>An object that is the instantiated service type or null if not found</returns>
+    public object? TryGetService(Type serviceType, object[]? args = null) {
         try {
             return GetService(serviceType, args);
         } catch {
-            return null!;
+            return null;
         }
     }
 
@@ -226,7 +240,7 @@ public class ServiceContainer {
         singletons[descriptor.ServiceType] = newSingleton!;
         return newSingleton;
     }
-
+    
     private TInterface Instantiate<TInterface>(ServiceDescriptor descriptor, ConstructorInfo? ctor = null) {
         if (ctor == null && descriptor.ImplementationType.GetConstructors().Length > 1)
             throw new Exception($"Multiple constructors found for type {descriptor.ImplementationType}. Please provide a specific constructor.");
