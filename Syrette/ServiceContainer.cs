@@ -165,12 +165,12 @@ public class ServiceContainer : IDisposable {
 
         if (descriptor.Lifetime == ServiceLifetime.Singleton) {
             lock (singletonLock) {
-                if (singletons.TryGetValue(descriptor.ServiceType, out var singleton)) {
+                if (singletons.TryGetValue(descriptor.ImplementationType, out var singleton)) {
                     return singleton;
                 }
 
                 var instance = Instantiate(descriptor.ImplementationType, bestCtor, mergedArgs);
-                singletons[descriptor.ServiceType] = instance;
+                singletons[descriptor.ImplementationType] = instance;
                 return instance;
             }
         }
