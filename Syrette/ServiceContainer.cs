@@ -2,290 +2,227 @@
 
 namespace Syrette;
 
-/// <summary>
-/// Container for managing service registrations and resolutions.
-/// </summary>
-public class ServiceContainer {
+public class ServiceContainer : IDisposable {
     private readonly List<ServiceDescriptor> descriptors = new();
     private readonly Dictionary<Type, object> singletons = new();
+    private readonly object singletonLock = new();
 
-    /// <summary>
-    /// Get all registered implementation types for a given service type.
-    /// </summary>
-    /// <typeparam name="TServices"></typeparam>
-    /// <returns></returns>
     public List<Type> GetServiceTypes<TServices>() =>
         descriptors.Where(d => d.ServiceType == typeof(TServices))
             .Select(d => d.ImplementationType).ToList();
 
-    /// <summary>
-    /// Get all registered services for a given service type.
-    /// </summary>
-    /// <typeparam name="TService"></typeparam>
     public List<TService> GetServices<TService>() where TService : class =>
         descriptors.Where(d => d.ServiceType == typeof(TService))
-            .Select(d => (TService)GetService(d.ImplementationType, d.Arguments?.ToArray())).ToList();
+            .Select(d => (TService)ResolveService(d.ImplementationType, null)).ToList();
 
-    /// <summary>
-    /// Registers a singleton service with its implementation.
-    /// </summary>
-    /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
-    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddSingleton<TInterface, TImplementation>()
         where TInterface : class
         where TImplementation : class, TInterface {
-        descriptors.Add(new() {
-            ServiceType = typeof(TInterface),
-            ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Singleton
-        });
+        AddDescriptor(typeof(TInterface), typeof(TImplementation), ServiceLifetime.Singleton, null);
         return this;
     }
 
-    /// <summary>
-    /// Registers a singleton service with its implementation.
-    /// </summary>
-    /// <param name="args">Arguments to be passed to the constructor, in order of appearance if of the same type.</param>
-    /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
-    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddSingleton<TInterface, TImplementation>(params object[] args)
         where TInterface : class
         where TImplementation : class, TInterface {
-        descriptors.Add(new() {
-            ServiceType = typeof(TInterface),
-            ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Singleton,
-            Arguments = args.ToList()
-        });
+        AddDescriptor(typeof(TInterface), typeof(TImplementation), ServiceLifetime.Singleton, args);
         return this;
     }
 
-    /// <summary>
-    /// Registers a singleton service where the service type is the same as the implementation type.
-    /// </summary>
-    /// <typeparam name="TClass">Class type of the service</typeparam>
     public ServiceContainer AddSingleton<TClass>()
         where TClass : class {
-        descriptors.Add(new() {
-            ServiceType = typeof(TClass),
-            ImplementationType = typeof(TClass),
-            Lifetime = ServiceLifetime.Singleton
-        });
+        AddDescriptor(typeof(TClass), typeof(TClass), ServiceLifetime.Singleton, null);
         return this;
     }
 
-    /// <summary>
-    /// Registers a singleton service with its implementation.
-    /// </summary>
-    /// <param name="args">Arguments to be passed to the constructor, in order of appearance if of the same type.</param>
-    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddSingleton<TImplementation>(params object[] args)
         where TImplementation : class {
-        descriptors.Add(new() {
-            ServiceType = typeof(TImplementation),
-            ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Singleton,
-            Arguments = args.ToList()
-        });
+        AddDescriptor(typeof(TImplementation), typeof(TImplementation), ServiceLifetime.Singleton, args);
         return this;
     }
 
-    /// <summary>
-    /// Registers a transient service with its implementation.
-    /// </summary>
-    /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
-    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddTransient<TInterface, TImplementation>()
         where TInterface : class
         where TImplementation : class, TInterface {
-        descriptors.Add(new() {
-            ServiceType = typeof(TInterface),
-            ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Transient
-        });
+        AddDescriptor(typeof(TInterface), typeof(TImplementation), ServiceLifetime.Transient, null);
         return this;
     }
 
-    /// <summary>
-    /// Registers a transient service with its implementation.
-    /// </summary>
-    /// <param name="args">Arguments to be passed to the constructor, in order of appearance if of the same type.</param>
-    /// <typeparam name="TInterface">Interface the service is implementing</typeparam>
-    /// <typeparam name="TImplementation">Implementation type of the service</typeparam>
     public ServiceContainer AddTransient<TInterface, TImplementation>(params object[] args)
         where TInterface : class
         where TImplementation : class, TInterface {
-        descriptors.Add(new() {
-            ServiceType = typeof(TInterface),
-            ImplementationType = typeof(TImplementation),
-            Lifetime = ServiceLifetime.Transient,
-            Arguments = args.ToList()
-        });
+        AddDescriptor(typeof(TInterface), typeof(TImplementation), ServiceLifetime.Transient, args);
         return this;
     }
 
-    /// <summary>
-    /// Registers a transient service where the service type is the same as the implementation type.
-    /// </summary>
-    /// <typeparam name="TClass">Class type of the service</typeparam>
     public ServiceContainer AddTransient<TClass>()
         where TClass : class {
-        descriptors.Add(new() {
-            ServiceType = typeof(TClass),
-            ImplementationType = typeof(TClass),
-            Lifetime = ServiceLifetime.Transient
-        });
+        AddDescriptor(typeof(TClass), typeof(TClass), ServiceLifetime.Transient, null);
         return this;
     }
 
-    /// <summary>
-    /// Registers a transient service where the service type is the same as the implementation type.
-    /// </summary>
-    /// <param name="args">Arguments to be passed to the constructor, in order of appearance if of the same type.</param>
-    /// <typeparam name="TClass">Class type of the service</typeparam>
     public ServiceContainer AddTransient<TClass>(params object[] args)
         where TClass : class {
-        descriptors.Add(new() {
-            ServiceType = typeof(TClass),
-            ImplementationType = typeof(TClass),
-            Lifetime = ServiceLifetime.Transient,
-            Arguments = args.ToList()
-        });
+        AddDescriptor(typeof(TClass), typeof(TClass), ServiceLifetime.Transient, args);
         return this;
     }
-    
-    /// <summary>
-    /// Resolves and returns an instance of the requested service type.
-    /// </summary>
-    /// <param name="serviceType">Type of the service that's being requested</param>
-    /// <param name="args">arguments to pass to the constructor of the service</param>
-    /// <remarks> you can't call generic methods with an unknown type at compile time
-    /// so we use reflection to call the generic GetService{T} method with the provided
-    /// type Basically we build the method GetService{serviceType}() at runtime and then call it.</remarks>
-    /// <returns>An object that is the instantiated service type</returns>
-    public object GetService(Type serviceType, object[]? args = null) {
-        List<Type> arguments = [serviceType];
 
-        if (args != null) arguments.AddRange(args.ToList().Select(a => a.GetType()));
-        
-        var method = typeof(ServiceContainer)
-            .GetMethod(nameof(GetService))!
-            .MakeGenericMethod(arguments.ToArray());
-        
-        return method.Invoke(this, args)!;
+    private void AddDescriptor(Type serviceType, Type implementationType, ServiceLifetime lifetime, object[]? args) {
+        if (descriptors.Any(d => d.ServiceType == serviceType && d.ImplementationType == implementationType)) {
+            throw new InvalidOperationException(
+                $"A registration for '{implementationType.Name}' as '{serviceType.Name}' already exists.");
+        }
+
+        descriptors.Add(new ServiceDescriptor {
+            ServiceType = serviceType,
+            ImplementationType = implementationType,
+            Lifetime = lifetime,
+            Arguments = args?.ToList()
+        });
     }
-    
-    /// <summary>
-    /// tries to resolve and return an instance of the requested service type. Returns null if it fails.
-    /// </summary>
-    /// <param name="serviceType">Type of the service that's being requested</param>
-    /// <param name="args">arguments to pass to the constructor of the service</param>
-    /// <remarks> you can't call generic methods with an unknown type at compile time
-    /// so we use reflection to call the generic GetService{T} method with the provided
-    /// type Basically we build the method GetService{serviceType}() at runtime and then call it.</remarks>
-    /// <returns>An object that is the instantiated service type or null if not found</returns>
+
+    public object GetService(Type serviceType, object[]? args = null) {
+        return ResolveService(serviceType, args);
+    }
+
+    public TService GetService<TService>() {
+        return (TService)ResolveService(typeof(TService), null);
+    }
+
     public object? TryGetService(Type serviceType, object[]? args = null) {
         try {
-            return GetService(serviceType, args);
-        } catch {
+            return ResolveService(serviceType, args);
+        }
+        catch (InvalidOperationException) {
             return null;
         }
     }
 
-    /// <summary>
-    /// Resolves and returns an instance of the requested service type.
-    /// </summary>
-    /// <typeparam name="TService">Interface type of the service being requested</typeparam>
-    /// <returns>Resolved service instance</returns>
-    public TService GetService<TService>() {
-        var descriptor = descriptors.FirstOrDefault(d => d.ServiceType == typeof(TService) || d.ImplementationType == typeof(TService));
+    private object ResolveService(Type serviceType, object[]? resolutionArgs) {
+        var descriptor = descriptors.FirstOrDefault(d =>
+            d.ServiceType == serviceType || d.ImplementationType == serviceType);
 
-        if (descriptor == null) throw new Exception($"Service of type {typeof(TService)} not registered.");
+        if (descriptor == null) {
+            throw new InvalidOperationException(
+                $"Service of type '{serviceType.Name}' not registered.");
+        }
+
+        var mergedArgs = descriptor.Arguments != null
+            ? new List<object>(descriptor.Arguments)
+            : new List<object>();
+
+        if (resolutionArgs != null) {
+            foreach (var arg in resolutionArgs) {
+                var argType = arg.GetType();
+                var index = mergedArgs.FindIndex(a => a.GetType() == argType);
+
+                if (index >= 0) {
+                    mergedArgs[index] = arg;
+                } else {
+                    mergedArgs.Add(arg);
+                }
+            }
+        }
 
         var ctors = descriptor.ImplementationType.GetConstructors();
-        var par = descriptor.Arguments ?? new List<object>();
-        int max = -1;
         ConstructorInfo? bestCtor = null;
+        int max = -1;
 
         foreach (var ctor in ctors) {
             var parameters = ctor.GetParameters();
-            //check if all parameters are registered services or optional or have been provided as arguments
-            if (parameters.Any(p => descriptors.All(d => d.ServiceType != p.ParameterType) && par.All(a => a.GetType() != p.ParameterType) && !p.IsOptional))
+
+            if (parameters.Any(p =>
+                    descriptors.All(d => d.ServiceType != p.ParameterType) &&
+                    mergedArgs.All(a => !p.ParameterType.IsAssignableFrom(a.GetType())) &&
+                    !p.IsOptional)) {
                 continue;
+            }
 
-            //check if this constructor has more registered parameters than the previous best
-            int satisfiedParams = parameters.Count(p => descriptors.Any(d => d.ServiceType == p.ParameterType));
-            satisfiedParams += par.Count(arg => parameters.Any(p => p.ParameterType == arg.GetType()));
+            int satisfied = parameters.Count(p =>
+                descriptors.Any(d => d.ServiceType == p.ParameterType));
 
-            if (satisfiedParams > max) {
-                max = satisfiedParams;
+            int argSatisfied = 0;
+
+            foreach (var param in parameters) {
+                if (!descriptors.Any(d => d.ServiceType == param.ParameterType) &&
+                    mergedArgs.Any(a => param.ParameterType.IsAssignableFrom(a.GetType()))) {
+                    argSatisfied++;
+                }
+            }
+
+            satisfied += argSatisfied;
+
+            if (satisfied > max) {
+                max = satisfied;
                 bestCtor = ctor;
             }
         }
 
-        if (bestCtor == null)
-            throw new Exception($"Cannot create service of type {typeof(TService)}. No suitable constructor found.");
-
-        // Transient: create a new instance each time
-        if (descriptor.Lifetime != ServiceLifetime.Singleton) {
-            var service = Instantiate<TService>(descriptor, bestCtor);
-            return service;
+        if (bestCtor == null) {
+            throw new InvalidOperationException(
+                $"Cannot create service of type '{serviceType.Name}'. No suitable constructor found.");
         }
 
-        // Singleton: return existing instance
-        if (singletons.TryGetValue(descriptor.ServiceType, out object? singleton)) return (TService)singleton;
+        if (descriptor.Lifetime == ServiceLifetime.Singleton) {
+            lock (singletonLock) {
+                if (singletons.TryGetValue(descriptor.ServiceType, out var singleton)) {
+                    return singleton;
+                }
 
-        // or create a new one if not yet created.
-        var newSingleton = Instantiate<TService>(descriptor, bestCtor);
-        singletons[descriptor.ServiceType] = newSingleton!;
-        return newSingleton;
+                var instance = Instantiate(descriptor.ImplementationType, bestCtor, mergedArgs);
+                singletons[descriptor.ServiceType] = instance;
+                return instance;
+            }
+        }
+
+        return Instantiate(descriptor.ImplementationType, bestCtor, mergedArgs);
     }
-    
-    private TInterface Instantiate<TInterface>(ServiceDescriptor descriptor, ConstructorInfo? ctor = null) {
-        if (ctor == null && descriptor.ImplementationType.GetConstructors().Length > 1)
-            throw new Exception($"Multiple constructors found for type {descriptor.ImplementationType}. Please provide a specific constructor.");
 
-        List<ParameterInfo> par;
-        List<object> args = descriptor.Arguments != null ? new List<object>(descriptor.Arguments) : new List<object>();
+    private object Instantiate(Type implementationType, ConstructorInfo ctor, List<object> args) {
+        var parameters = ctor.GetParameters();
+        var resolvedParams = new object?[parameters.Length];
+        var usedArgs = new List<object>();
 
-        if (ctor == null)
-            par = descriptor.ImplementationType
-                .GetConstructors().Single()
-                .GetParameters()
-                //.Select(p => p.ParameterType)
-                .ToList();
-        else
-            par = ctor.GetParameters()
-                //.Select(p => p.ParameterType)
-                .ToList();
+        for (var i = 0; i < parameters.Length; i++) {
+            var paramType = parameters[i].ParameterType;
 
-        object[] parameters = new object[par.Count];
+            var arg = args.FirstOrDefault(a =>
+                !usedArgs.Contains(a) && paramType.IsAssignableFrom(a.GetType()));
 
-        for (int i = 0; i < par.Count; i++) {
-            object? arg = args.FirstOrDefault(a => a.GetType() == par[i].ParameterType);
-            if (arg != null) { // this parameter is satisfied by a provided argument
-                parameters[i] = arg;
-                args.Remove(arg); // remove to handle multiple parameters of the same type
-                continue;
-            }
-            
-            arg = TryGetService(par[i].ParameterType);
             if (arg != null) {
-                // this parameter is satisfied by a registered service
-                parameters[i] = arg;
+                resolvedParams[i] = arg;
+                usedArgs.Add(arg);
                 continue;
             }
-            
-            if (par[i].IsOptional) {
-                // this parameter is optional and not provided, use default value
-                parameters[i] = par[i].DefaultValue!;
+
+            var ctorArg = TryGetService(paramType);
+            if (ctorArg != null) {
+                resolvedParams[i] = ctorArg;
                 continue;
             }
-            throw new Exception($"Cannot resolve parameter {par[i].Name} of type {par[i].ParameterType} for service {descriptor.ImplementationType}");
+
+            if (parameters[i].IsOptional) {
+                resolvedParams[i] = parameters[i].DefaultValue;
+                continue;
+            }
+
+            throw new InvalidOperationException(
+                $"Cannot resolve parameter '{parameters[i].Name}' of type '{paramType.Name}' for service '{implementationType.Name}'.");
         }
 
-        var service = (TInterface?)Activator.CreateInstance(descriptor.ImplementationType, parameters);
+        var instance = Activator.CreateInstance(implementationType, resolvedParams);
 
-        return service ?? throw new Exception($"Could not create instance of type {descriptor.ImplementationType}");
+        return instance ??
+               throw new InvalidOperationException(
+                   $"Could not create instance of type '{implementationType.Name}'.");
+    }
+
+    public void Dispose() {
+        foreach (var disposable in singletons.Values.OfType<IDisposable>()) {
+            disposable.Dispose();
+        }
+
+        singletons.Clear();
+        descriptors.Clear();
     }
 }
