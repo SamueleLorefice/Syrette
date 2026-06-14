@@ -2,7 +2,7 @@ namespace Syrette.Tests;
 
 public class ServiceContainerDisposalTests
 {
-    [Fact]
+    [Fact(DisplayName = "Dispose calls Dispose on singleton instances that implement IDisposable")]
     public void Dispose_disposes_singletons_implementing_IDisposable()
     {
         var container = new ServiceContainer();
@@ -13,7 +13,7 @@ public class ServiceContainerDisposalTests
         Assert.True(instance.IsDisposed);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Dispose clears the singleton cache so subsequent resolution throws")]
     public void Dispose_clears_singleton_cache()
     {
         var container = new ServiceContainer();
@@ -26,7 +26,7 @@ public class ServiceContainerDisposalTests
             container.GetService<TestDisposableService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "Calling Dispose multiple times does not throw")]
     public void Multiple_dispose_is_safe()
     {
         var container = new ServiceContainer();

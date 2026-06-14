@@ -2,7 +2,7 @@ namespace Syrette.Tests;
 
 public class ServiceContainerRegistrationTests
 {
-    [Fact]
+    [Fact(DisplayName = "AddSingleton<TInterface, TImplementation> registers a service that can be resolved")]
     public void AddSingleton_TInterface_TImplementation_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -10,7 +10,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<ITestService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddSingleton<TInterface, TImplementation> with constructor args registers and resolves")]
     public void AddSingleton_TInterface_TImplementation_with_args_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -18,7 +18,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<ITestService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddSingleton<TClass> (self-registration) registers and resolves")]
     public void AddSingleton_TClass_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -26,7 +26,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<TestServiceImpl>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddSingleton<TClass> with constructor args registers and resolves")]
     public void AddSingleton_TClass_with_args_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -34,7 +34,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<TestDeepService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddTransient<TInterface, TImplementation> registers a service that can be resolved")]
     public void AddTransient_TInterface_TImplementation_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -42,7 +42,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<ITestService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddTransient<TInterface, TImplementation> with constructor args registers and resolves")]
     public void AddTransient_TInterface_TImplementation_with_args_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -50,7 +50,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<ITestService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddTransient<TClass> (self-registration) registers and resolves")]
     public void AddTransient_TClass_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -58,7 +58,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<TestServiceImpl>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "AddTransient<TClass> with constructor args registers and resolves")]
     public void AddTransient_TClass_with_args_registers_successfully()
     {
         var container = new ServiceContainer();
@@ -66,7 +66,7 @@ public class ServiceContainerRegistrationTests
         Assert.NotNull(container.GetService<TestDeepService>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "Fluent chaining returns the same ServiceContainer instance")]
     public void Fluent_chaining_returns_same_container()
     {
         var container = new ServiceContainer();
@@ -76,7 +76,7 @@ public class ServiceContainerRegistrationTests
         Assert.Same(container, result);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Registering the same (ServiceType, ImplementationType) pair twice throws InvalidOperationException")]
     public void Duplicate_registration_same_pair_throws()
     {
         var container = new ServiceContainer();
@@ -85,7 +85,7 @@ public class ServiceContainerRegistrationTests
             container.AddSingleton<ITestService, TestServiceImpl>());
     }
 
-    [Fact]
+    [Fact(DisplayName = "Registering two different implementations for the same service type is allowed and both are resolvable")]
     public void Duplicate_registration_different_impl_for_same_service_allowed()
     {
         var container = new ServiceContainer();

@@ -2,7 +2,7 @@ namespace Syrette.Tests;
 
 public class ServiceContainerThreadingTests
 {
-    [Fact]
+    [Fact(DisplayName = "Concurrent singleton resolution from multiple threads returns the same instance")]
     public void Concurrent_singleton_resolution_returns_same_instance()
     {
         var container = new ServiceContainer();
@@ -21,7 +21,7 @@ public class ServiceContainerThreadingTests
         }
     }
 
-    [Fact]
+    [Fact(DisplayName = "Concurrent transient resolution from multiple threads returns unique instances")]
     public void Concurrent_transient_resolution_returns_unique_instances()
     {
         var container = new ServiceContainer();
@@ -43,7 +43,7 @@ public class ServiceContainerThreadingTests
         }
     }
 
-    [Fact]
+    [Fact(DisplayName = "Concurrent registration and resolution does not crash or deadlock")]
     public void Concurrent_registration_and_resolution_does_not_crash()
     {
         var container = new ServiceContainer();

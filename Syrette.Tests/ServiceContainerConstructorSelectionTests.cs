@@ -27,7 +27,7 @@ public class ServiceContainerConstructorSelectionTests
         public NoSatisfiableCtor(int value) { }
     }
 
-    [Fact]
+    [Fact(DisplayName = "Greedy constructor picks the ctor with the most parameters satisfiable by registered services")]
     public void Greedy_picks_most_satisfiable_constructor()
     {
         var container = new ServiceContainer();
@@ -42,7 +42,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.Null(instance.C);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Greedy constructor picks the ctor with all parameters satisfiable over a partial match")]
     public void Greedy_picks_all_satisfied_over_partial()
     {
         var container = new ServiceContainer();
@@ -58,7 +58,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.NotNull(instance.C);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Greedy constructor falls back to 1-param ctor when only 1 service is available")]
     public void Greedy_falls_back_to_1_param_when_only_1_satisfiable()
     {
         var container = new ServiceContainer();
@@ -72,7 +72,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.Null(instance.C);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Optional parameter uses its default value when the parameter type is not registered")]
     public void Optional_parameter_used_when_not_registered()
     {
         var container = new ServiceContainer();
@@ -84,7 +84,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.Equal("default", instance.Name);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Registration-time args satisfy a constructor parameter by type matching")]
     public void Registration_args_satisfy_constructor()
     {
         var container = new ServiceContainer();
@@ -94,7 +94,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.Equal(42, instance.Value);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Resolution-time args satisfy a constructor parameter when no registration-time args exist")]
     public void Resolution_args_satisfy_constructor()
     {
         var container = new ServiceContainer();
@@ -105,7 +105,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.Equal(99, instance.Value);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Resolution-time args override registration-time args of the same type in constructor selection")]
     public void Resolution_args_override_registration_args()
     {
         var container = new ServiceContainer();
@@ -116,7 +116,7 @@ public class ServiceContainerConstructorSelectionTests
         Assert.Equal(20, instance.Value);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Throws InvalidOperationException when no constructor has all required parameters satisfiable")]
     public void No_suitable_constructor_throws()
     {
         var container = new ServiceContainer();
